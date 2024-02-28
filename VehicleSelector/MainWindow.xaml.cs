@@ -65,6 +65,9 @@ namespace VehicleSelector
             PartsListView.ItemsSource = Part;
         }
 
+        private void CarsListView_SelectionChanged(object sender, System.Windows.Controls.SelectionChangedEventArgs e)
+        {
 
+        }
     }
 }
