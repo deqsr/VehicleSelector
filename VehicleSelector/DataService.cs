@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 
 namespace VehicleSelector
@@ -12,57 +13,60 @@ namespace VehicleSelector
             _dbContext = new TransportSelectionDBEntities();
         }
 
-        public List<Car> SearchCars(string brand, string model, int year, decimal minPrice, decimal maxPrice, string color, int mileage, string condition, string type)
-        {
-            var query = _dbContext.Car.AsNoTracking()
-                .Include("Image")
-                .Include("CarDescription")
-                .Where(c => (string.IsNullOrEmpty(brand) || c.brand.Contains(brand))
-                            && (string.IsNullOrEmpty(model) || c.model.Contains(model))
-                            && (year <= 0 || c.year == year)
-                            && (minPrice <= 0 || c.price >= minPrice)
-                            && (maxPrice == decimal.MaxValue || c.price <= maxPrice)
-                            && (string.IsNullOrEmpty(color) || c.color.Contains(color))
-                            && (mileage <= 0 || c.mileage == mileage)
-                            && (string.IsNullOrEmpty(condition) || c.condition.Contains(condition))
-                            && (string.IsNullOrEmpty(type) || c.type.Contains(type)))
-                .ToList();
 
-            query.ForEach(car =>
+        public List<Part> SearchParts(string name, string compatible_with, decimal minPrice, decimal maxPrice, string category)
+        {
+            IQueryable<Part> query = _dbContext.Part.Include("PartImage");
+
+            if (!string.IsNullOrEmpty(name))
             {
-                if (car.Image != null)
-                {
-                    car.Image.image1 = _dbContext.Image.AsNoTracking().FirstOrDefault(i => i.id == car.Image.id)?.image1;
-                }
-            });
+                query = query.Where(p => p.name.Contains(name));
+            }
 
-            return query;
-        }
+            if (!string.IsNullOrEmpty(compatible_with))
+            {
+                query = query.Where(p => p.compatible_with.Contains(compatible_with));
+            }
 
-        public string GetCarDescription(int carId)
-        {
-            return _dbContext.CarDescription.AsNoTracking().FirstOrDefault(cd => cd.Car_id == carId)?.description;
-        }
+            if (minPrice > 0)
+            {
+                query = query.Where(p => p.price >= minPrice);
+            }
 
-        public List<Part> SearchParts(string name, string description, decimal minPrice, decimal maxPrice)
-        {
-            var query = _dbContext.Part.AsNoTracking()
-                .Include("PartImage")
-                .Where(p => (string.IsNullOrEmpty(name) || p.name.Contains(name))
-                            && (string.IsNullOrEmpty(description) || p.description.Contains(description))
-                            && (minPrice <= 0 || p.price >= minPrice)
-                            && (maxPrice == decimal.MaxValue || p.price <= maxPrice))
-                .ToList();
+            if (maxPrice < decimal.MaxValue)
+            {
+                query = query.Where(p => p.price <= maxPrice);
+            }
 
-            query.ForEach(part =>
+            if (!string.IsNullOrEmpty(category))
+            {
+                query = query.Where(p => p.name.Contains(category));
+            }
+
+            List<Part> parts = query.ToList();
+            foreach (var part in parts)
             {
                 if (part.PartImage != null)
                 {
-                    part.PartImage.image = _dbContext.PartImage.AsNoTracking().FirstOrDefault(pi => pi.id == part.PartImage.id)?.image;
+                    part.PartImage.image = _dbContext.PartImage.Find(part.PartImage.id)?.image;
                 }
-            });
-
-            return query;
+            }
+            return parts;
         }
+
+        public List<string> GetUniqueVehicleModels()
+        {
+            return _dbContext.Part
+                              .Where(p => !string.IsNullOrEmpty(p.compatible_with))
+                              .Select(p => p.compatible_with)
+                              .Distinct()
+                              .ToList();
+        }
+        public List<string> GetUniqueCategories()
+        {
+            return _dbContext.Part.Select(p => p.name).Distinct().ToList();
+        }
+
+
     }
 }

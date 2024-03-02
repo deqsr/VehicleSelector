@@ -14,11 +14,12 @@ namespace VehicleSelector
     
     public partial class Part
     {
+        public string CompatibleModelIds { get; set; }
         public int id { get; set; }
         public string name { get; set; }
+        public string compatible_with { get; set; }
         public string description { get; set; }
         public decimal price { get; set; }
-        public string compatible_with { get; set; }
     
         public virtual PartImage PartImage { get; set; }
     }
