@@ -115,7 +115,7 @@
 
 
                 <!-- Search Button -->
-                <Button x:Name="SearchPartsButton" Content="Пошук" Style="{StaticResource SearchButtonStyle}" Grid.Row="3" Grid.Column="0" Grid.ColumnSpan="2" Click="SearchPartsButton_Click" Margin="5"/>
+                <Button x:Name="SearchPartsButton" Content="Пошук" Style="{StaticResource SearchButtonStyle}" Grid.Row="3" Grid.Column="0" Grid.ColumnSpan="2" Click="SearchPartsButton_Click" Margin="0,5,5,5"/>
                 <!-- Remove the negative margins -->
 
                 <TextBlock Text="Список автомобілей:" Grid.Row="4" Grid.Column="0" Margin="0 5" FontSize="16" VerticalAlignment="Center" />
